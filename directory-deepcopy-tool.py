@@ -24,7 +24,17 @@ def get_directory_path_from_commandline(prompt: str) -> str:
     ask_to_proceed()
     return path
 
-def copy_file(source_path: str, dest_path: str) -> None:
+"""
+Copies the source file to the destination directory
+
+Args:
+    source_path: path to source file, must be an existing file
+    dest_path: path of destination directory, must be a directory path, directory will be created if not present
+    
+Returns:
+    int: number of bytes copied
+"""
+def copy_file(source_path: str, dest_path: str) -> int:
     if not os.path.isfile(source_path):
         print("ERROR: {path} is not a file!".format(path = source_path))
         exit(1)
@@ -37,6 +47,8 @@ def copy_file(source_path: str, dest_path: str) -> None:
         os.makedirs(dest_path)
 
     shutil.copy(source_path, dest_path)
+    num_bytes_copied = os.path.getsize(source_path)
+    return num_bytes_copied
 
 
 
