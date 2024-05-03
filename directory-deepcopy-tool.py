@@ -132,8 +132,6 @@ def merge_copy_directory(source_directory_path: str, dest_directory_path: str) -
 
 
 if __name__ == '__main__':
-    # source_path = get_directory_path_from_commandline("source path: \n")
-    # destination_path = get_directory_path_from_commandline("destination path: \n")
-    source_path = input("source path: \n")
-    destination_path = input("destination path: \n")
+    source_path = get_directory_path_from_commandline("source path: \n")
+    destination_path = get_directory_path_from_commandline("destination path: \n")
     merge_copy_directory(source_path, destination_path)
