@@ -77,9 +77,10 @@ the desire directory instead of overwrite the entire directory
 Args:
     source_directory_path: path to source directory
     dest_directory_path: path of destination directory
+    total_size_copied: number of bytes copied before entering this function
     
 Returns:
-    int: number of bytes copied
+    int: number of bytes copied + total_size_copied
 
 example:
 source: /common/path/path/to/file.txt
@@ -114,7 +115,7 @@ destination after copy:
 """
 
 
-def merge_copy_directory(source_directory_path: str, dest_directory_path: str) -> int:
+def merge_copy_directory(source_directory_path: str, dest_directory_path: str, total_size_copied: int) -> int:
     print('merge copying directory {source} to {dest}'.format(source=source_directory_path, dest=dest_directory_path))
 
     for source_entry_name in os.listdir(source_directory_path):
@@ -123,15 +124,19 @@ def merge_copy_directory(source_directory_path: str, dest_directory_path: str) -
         abs_dest_entry_path = os.path.join(dest_directory_path, source_entry_name)
 
         if os.path.isfile(abs_source_entry_path):
-            copy_file(abs_source_entry_path, dest_directory_path)
+            total_size_copied += copy_file(abs_source_entry_path, dest_directory_path)
         elif os.path.isdir(abs_source_entry_path):
-            merge_copy_directory(abs_source_entry_path, abs_dest_entry_path)
+            total_size_copied = merge_copy_directory(abs_source_entry_path, abs_dest_entry_path, total_size_copied)
         else:
             print("should not be here")
             exit(1)
+
+        print("total size copied: {size}".format(size=total_size_copied))
+
+    return total_size_copied
 
 
 if __name__ == '__main__':
     source_path = get_directory_path_from_commandline("source path: \n")
     destination_path = get_directory_path_from_commandline("destination path: \n")
-    merge_copy_directory(source_path, destination_path)
+    merge_copy_directory(source_path, destination_path, 0)
