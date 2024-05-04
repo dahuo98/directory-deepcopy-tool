@@ -1,5 +1,8 @@
 import os
 import shutil
+import math
+
+from typing import Tuple
 
 
 def ask_to_proceed():
@@ -136,7 +139,55 @@ def merge_copy_directory(source_directory_path: str, dest_directory_path: str, t
     return total_size_copied
 
 
+"""
+Count number of files under a directory and size of the directory recursively
+
+Args:
+    directory_path: path to directory
+    
+Returns:
+    int: number of files under the directory
+    int: size of directory
+
+"""
+
+
+def count_files(directory_path: str, starting_count: int = 0, starting_size: int = 0) -> Tuple[int, int]:
+    count = starting_count
+    size = starting_size
+    for entry in os.listdir(directory_path):
+        entry = os.path.join(directory_path, entry)
+        if os.path.isfile(entry):
+            count += 1
+            size += os.path.getsize(entry)
+        elif os.path.isdir(entry):
+            count, size = count_files(entry, count, size)
+        else:
+            print("should not be here")
+            exit(1)
+
+    print('\r files found: {c}, size: {s}'.format(c=count, s=convert_size(size)), end="")
+    return count, size
+
+
+"""
+Convert size in bytes to most appropriate unit
+"""
+
+
+def convert_size(size_bytes: int) -> str:
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
+
+
 if __name__ == '__main__':
     source_path = get_directory_path_from_commandline("source path: \n")
-    destination_path = get_directory_path_from_commandline("destination path: \n")
-    merge_copy_directory(source_path, destination_path, 0)
+    # destination_path = get_directory_path_from_commandline("destination path: \n")
+    # merge_copy_directory(source_path, destination_path, 0)
+    count = count_files(source_path)
+    print("number of files: " + str(count))
