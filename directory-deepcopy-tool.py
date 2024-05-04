@@ -4,6 +4,8 @@ import math
 import argparse
 
 from typing import Tuple
+from typing import Type
+from tqdm import tqdm
 
 
 def ask_to_proceed():
@@ -122,7 +124,12 @@ destination after copy:
 """
 
 
-def merge_copy_directory(source_directory_path: str, dest_directory_path: str, total_size_copied: int, dry_run: bool) -> int:
+def merge_copy_directory(
+        source_directory_path: str,
+        dest_directory_path: str,
+        total_size_copied: int,
+        dry_run: bool,
+        p_bar: Type[tqdm]) -> int:
     print('merge copying directory {source} to {dest}'.format(source=source_directory_path, dest=dest_directory_path))
 
     for source_entry_name in os.listdir(source_directory_path):
@@ -132,8 +139,11 @@ def merge_copy_directory(source_directory_path: str, dest_directory_path: str, t
 
         if os.path.isfile(abs_source_entry_path):
             total_size_copied += copy_file(abs_source_entry_path, dest_directory_path, dry_run)
+
+            p_bar.update(total_size_copied)
+            p_bar.refresh()
         elif os.path.isdir(abs_source_entry_path):
-            total_size_copied = merge_copy_directory(abs_source_entry_path, abs_dest_entry_path, total_size_copied, dry_run)
+            total_size_copied = merge_copy_directory(abs_source_entry_path, abs_dest_entry_path, total_size_copied, dry_run, p_bar)
         else:
             print("should not be here")
             exit(1)
@@ -204,5 +214,7 @@ if __name__ == '__main__':
         source_path = get_directory_path_from_commandline("source path: \n")
         destination_path = get_directory_path_from_commandline("destination path: \n")
         print("counting files:")
-        count_files(source_path)
-        merge_copy_directory(source_path, destination_path, 0, args.dry_run)
+        count, size = count_files(source_path)
+        p_bar = tqdm(range(size))
+
+        merge_copy_directory(source_path, destination_path, 0, args.dry_run, p_bar)
