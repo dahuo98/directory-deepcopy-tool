@@ -2,6 +2,7 @@ import os
 import shutil
 import math
 import argparse
+import time
 
 from typing import Tuple
 from typing import Type
@@ -53,7 +54,8 @@ Returns:
 
 
 def copy_file(source_path: str, dest_path: str, dry_run: bool) -> int:
-    print("copying file {source} to {dest}".format(source=source_path, dest=dest_path))
+    # print("copying file {source} to {dest}".format(source=source_path, dest=dest_path))
+    # time.sleep(1)
 
     if dry_run:
         return os.path.getsize(source_path)
@@ -130,7 +132,7 @@ def merge_copy_directory(
         total_size_copied: int,
         dry_run: bool,
         p_bar: Type[tqdm]) -> int:
-    print('merge copying directory {source} to {dest}'.format(source=source_directory_path, dest=dest_directory_path))
+    # print('merge copying directory {source} to {dest}'.format(source=source_directory_path, dest=dest_directory_path))
 
     for source_entry_name in os.listdir(source_directory_path):
 
@@ -148,7 +150,7 @@ def merge_copy_directory(
             print("should not be here")
             exit(1)
 
-        print("total size copied: {size}".format(size=total_size_copied))
+        # print("total size copied: {size}".format(size=total_size_copied))
 
     return total_size_copied
 
@@ -215,6 +217,7 @@ if __name__ == '__main__':
         destination_path = get_directory_path_from_commandline("destination path: \n")
         print("counting files:")
         count, size = count_files(source_path)
-        p_bar = tqdm(range(size))
+        print()
 
+        p_bar = tqdm(range(size))
         merge_copy_directory(source_path, destination_path, 0, args.dry_run, p_bar)
