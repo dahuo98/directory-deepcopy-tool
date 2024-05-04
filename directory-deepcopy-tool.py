@@ -1,6 +1,7 @@
 import os
 import shutil
 import math
+import argparse
 
 from typing import Tuple
 
@@ -49,8 +50,11 @@ Returns:
 """
 
 
-def copy_file(source_path: str, dest_path: str) -> int:
+def copy_file(source_path: str, dest_path: str, dry_run: bool) -> int:
     print("copying file {source} to {dest}".format(source=source_path, dest=dest_path))
+
+    if dry_run:
+        return os.path.getsize(source_path)
 
     if not os.path.isfile(source_path):
         print("ERROR: {path} is not a file!".format(path=source_path))
@@ -118,7 +122,7 @@ destination after copy:
 """
 
 
-def merge_copy_directory(source_directory_path: str, dest_directory_path: str, total_size_copied: int) -> int:
+def merge_copy_directory(source_directory_path: str, dest_directory_path: str, total_size_copied: int, dry_run: bool) -> int:
     print('merge copying directory {source} to {dest}'.format(source=source_directory_path, dest=dest_directory_path))
 
     for source_entry_name in os.listdir(source_directory_path):
@@ -127,9 +131,9 @@ def merge_copy_directory(source_directory_path: str, dest_directory_path: str, t
         abs_dest_entry_path = os.path.join(dest_directory_path, source_entry_name)
 
         if os.path.isfile(abs_source_entry_path):
-            total_size_copied += copy_file(abs_source_entry_path, dest_directory_path)
+            total_size_copied += copy_file(abs_source_entry_path, dest_directory_path, dry_run)
         elif os.path.isdir(abs_source_entry_path):
-            total_size_copied = merge_copy_directory(abs_source_entry_path, abs_dest_entry_path, total_size_copied)
+            total_size_copied = merge_copy_directory(abs_source_entry_path, abs_dest_entry_path, total_size_copied, dry_run)
         else:
             print("should not be here")
             exit(1)
@@ -186,8 +190,19 @@ def convert_size(size_bytes: int) -> str:
 
 
 if __name__ == '__main__':
-    source_path = get_directory_path_from_commandline("source path: \n")
-    # destination_path = get_directory_path_from_commandline("destination path: \n")
-    # merge_copy_directory(source_path, destination_path, 0)
-    count = count_files(source_path)
-    print("number of files: " + str(count))
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--count', action='store_true')
+    parser.add_argument('--dry-run', action='store_true')
+    args = parser.parse_args()
+
+    if args.count:
+        dir_path = get_directory_path_from_commandline("directory path: \n")
+        print("counting files:")
+        count_files(dir_path)
+    else:
+        source_path = get_directory_path_from_commandline("source path: \n")
+        destination_path = get_directory_path_from_commandline("destination path: \n")
+        print("counting files:")
+        count_files(source_path)
+        merge_copy_directory(source_path, destination_path, 0, args.dry_run)
